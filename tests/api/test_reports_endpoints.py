@@ -44,18 +44,21 @@ def bind_reporting_api(reporting_service: Mock) -> None:
     init_reporting_api(reporting_service)
 
 
-def test_get_total_bonus_returns_200(reporting_service: Mock) -> None:
+def test_get_total_bonus_returns_200(reporting_service: Mock, function_context) -> None:
     reporting_service.get_total_bonus_paid.return_value = Decimal("102000.00")
     req = func.HttpRequest(method="GET", url="/api/reports/total-bonus", body=b"")
 
-    resp = get_total_bonus(req)
+    resp = get_total_bonus(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
     assert body["totalBonusPaid"] == "102000.00"
 
 
-def test_get_employees_without_bonus_returns_items_and_count(reporting_service: Mock) -> None:
+def test_get_employees_without_bonus_returns_items_and_count(
+    reporting_service: Mock,
+    function_context,
+) -> None:
     rows = [
         EmployeeWithoutBonusRow(employee_id=2, first_name="Ben", last_name="Carter"),
         EmployeeWithoutBonusRow(employee_id=4, first_name="Dana", last_name="Fox"),
@@ -70,7 +73,7 @@ def test_get_employees_without_bonus_returns_items_and_count(reporting_service: 
         body=b"",
     )
 
-    resp = get_employees_without_bonus(req)
+    resp = get_employees_without_bonus(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
@@ -79,7 +82,7 @@ def test_get_employees_without_bonus_returns_items_and_count(reporting_service: 
     assert body["items"][0]["employeeId"] == 2
 
 
-def test_get_bonus_percentage_returns_items(reporting_service: Mock) -> None:
+def test_get_bonus_percentage_returns_items(reporting_service: Mock, function_context) -> None:
     rows = [
         BonusPercentageRow(
             employee_id=1,
@@ -91,14 +94,17 @@ def test_get_bonus_percentage_returns_items(reporting_service: Mock) -> None:
     reporting_service.get_bonus_percentages.return_value = rows
     req = func.HttpRequest(method="GET", url="/api/reports/bonus-percentage", body=b"")
 
-    resp = get_bonus_percentage(req)
+    resp = get_bonus_percentage(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
     assert body["items"][0]["bonusPercentage"] == "8.33"
 
 
-def test_get_departments_over_average_returns_items(reporting_service: Mock) -> None:
+def test_get_departments_over_average_returns_items(
+    reporting_service: Mock,
+    function_context,
+) -> None:
     rows = [
         DepartmentOverAverageRow(
             department_id=1,
@@ -114,14 +120,14 @@ def test_get_departments_over_average_returns_items(reporting_service: Mock) -> 
         body=b"",
     )
 
-    resp = get_departments_over_average(req)
+    resp = get_departments_over_average(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
     assert body["items"][0]["departmentName"] == "Engineering"
 
 
-def test_get_bonus_ranking_returns_items(reporting_service: Mock) -> None:
+def test_get_bonus_ranking_returns_items(reporting_service: Mock, function_context) -> None:
     rows = [
         BonusRankingRow(
             rank=1,
@@ -134,7 +140,7 @@ def test_get_bonus_ranking_returns_items(reporting_service: Mock) -> None:
     reporting_service.get_bonus_ranking.return_value = rows
     req = func.HttpRequest(method="GET", url="/api/reports/bonus-ranking", body=b"")
 
-    resp = get_bonus_ranking(req)
+    resp = get_bonus_ranking(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
@@ -142,7 +148,10 @@ def test_get_bonus_ranking_returns_items(reporting_service: Mock) -> None:
     assert body["items"][0]["bonus"] == "30000.00"
 
 
-def test_get_highest_compensation_returns_comparison(reporting_service: Mock) -> None:
+def test_get_highest_compensation_returns_comparison(
+    reporting_service: Mock,
+    function_context,
+) -> None:
     reporting_service.get_highest_compensation.return_value = HighestCompensationResult(
         highest_salary_employee=HighestSalaryRow(
             employee_id=9,
@@ -164,7 +173,7 @@ def test_get_highest_compensation_returns_comparison(reporting_service: Mock) ->
         body=b"",
     )
 
-    resp = get_highest_compensation(req)
+    resp = get_highest_compensation(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
@@ -173,7 +182,10 @@ def test_get_highest_compensation_returns_comparison(reporting_service: Mock) ->
     assert body["highestTotalCompensationEmployee"]["totalCompensation"] == "202000.00"
 
 
-def test_get_highest_compensation_returns_404_when_no_employees(reporting_service: Mock) -> None:
+def test_get_highest_compensation_returns_404_when_no_employees(
+    reporting_service: Mock,
+    function_context,
+) -> None:
     reporting_service.get_highest_compensation.side_effect = NotFoundError(
         "No employees found.",
         code="NO_EMPLOYEES_FOUND",
@@ -184,7 +196,7 @@ def test_get_highest_compensation_returns_404_when_no_employees(reporting_servic
         body=b"",
     )
 
-    resp = get_highest_compensation(req)
+    resp = get_highest_compensation(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 404
     body = json.loads(resp.get_body())

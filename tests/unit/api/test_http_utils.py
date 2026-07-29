@@ -24,7 +24,7 @@ class _FakeContext:
 @handle_errors
 def _ok_handler(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     return json_response({"status": "ok"})
 
@@ -32,7 +32,7 @@ def _ok_handler(
 @handle_errors
 def _validation_handler(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     raise ValidationError("Invalid input.")
 
@@ -40,7 +40,7 @@ def _validation_handler(
 @handle_errors
 def _not_found_handler(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     raise NotFoundError.for_resource("Employee", 99)
 
@@ -48,7 +48,7 @@ def _not_found_handler(
 @handle_errors
 def _conflict_handler(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     raise ConflictError("Department has employees.", code="DEPARTMENT_HAS_EMPLOYEES")
 
@@ -56,7 +56,7 @@ def _conflict_handler(
 @handle_errors
 def _dependency_handler(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     raise DependencyError("Database temporarily unavailable.")
 
@@ -64,7 +64,7 @@ def _dependency_handler(
 @handle_errors
 def _domain_error_handler(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     raise ECSError("Unexpected domain failure.", code="ECS_FAILURE")
 
@@ -72,7 +72,7 @@ def _domain_error_handler(
 @handle_errors
 def _unexpected_handler(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     raise RuntimeError("boom")
 

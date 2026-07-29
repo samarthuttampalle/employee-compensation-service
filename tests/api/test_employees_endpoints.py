@@ -47,7 +47,7 @@ def _sample_employee(**overrides: object) -> Employee:
     return Employee(**defaults)  # type: ignore[arg-type]
 
 
-def test_create_employee_returns_201(employee_service: Mock) -> None:
+def test_create_employee_returns_201(employee_service: Mock, function_context) -> None:
     created = _sample_employee()
     employee_service.create_employee.return_value = created
     req = func.HttpRequest(
@@ -64,7 +64,7 @@ def test_create_employee_returns_201(employee_service: Mock) -> None:
         headers={"Content-Type": "application/json"},
     )
 
-    resp = create_employee(req)
+    resp = create_employee(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 201
     body = json.loads(resp.get_body())
@@ -72,7 +72,7 @@ def test_create_employee_returns_201(employee_service: Mock) -> None:
     assert resp.headers.get("Location") == "/api/employees/1"
 
 
-def test_get_employee_returns_404_when_missing(employee_service: Mock) -> None:
+def test_get_employee_returns_404_when_missing(employee_service: Mock, function_context) -> None:
     employee_service.get_employee.side_effect = NotFoundError.for_resource("Employee", 99)
     req = func.HttpRequest(
         method="GET",
@@ -81,14 +81,14 @@ def test_get_employee_returns_404_when_missing(employee_service: Mock) -> None:
         route_params={"employeeId": "99"},
     )
 
-    resp = get_employee(req)
+    resp = get_employee(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 404
     body = json.loads(resp.get_body())
     assert body["error"]["code"] == "EMPLOYEE_NOT_FOUND"
 
 
-def test_get_employee_invalid_id_returns_400(employee_service: Mock) -> None:
+def test_get_employee_invalid_id_returns_400(employee_service: Mock, function_context) -> None:
     req = func.HttpRequest(
         method="GET",
         url="/api/employees/abc",
@@ -96,13 +96,13 @@ def test_get_employee_invalid_id_returns_400(employee_service: Mock) -> None:
         route_params={"employeeId": "abc"},
     )
 
-    resp = get_employee(req)
+    resp = get_employee(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 400
     employee_service.get_employee.assert_not_called()
 
 
-def test_get_employee_with_default_bonus(employee_service: Mock) -> None:
+def test_get_employee_with_default_bonus(employee_service: Mock, function_context) -> None:
     employee = _sample_employee(bonus=None, salary=Decimal("100000.00"))
     employee_service.get_employee.return_value = EmployeeReadResult(
         employee=employee,
@@ -117,7 +117,7 @@ def test_get_employee_with_default_bonus(employee_service: Mock) -> None:
         params={"applyDefaultBonus": "true"},
     )
 
-    resp = get_employee(req)
+    resp = get_employee(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
@@ -125,7 +125,7 @@ def test_get_employee_with_default_bonus(employee_service: Mock) -> None:
     assert body["bonusIsDefaulted"] is True
 
 
-def test_list_employees_returns_paginated_payload(employee_service: Mock) -> None:
+def test_list_employees_returns_paginated_payload(employee_service: Mock, function_context) -> None:
     employee_service.list_employees.return_value = EmployeeListResult(
         items=[_sample_employee()],
         total=1,
@@ -134,7 +134,7 @@ def test_list_employees_returns_paginated_payload(employee_service: Mock) -> Non
     )
     req = func.HttpRequest(method="GET", url="/api/employees", body=b"", params={})
 
-    resp = list_employees(req)
+    resp = list_employees(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 200
     body = json.loads(resp.get_body())
@@ -142,7 +142,7 @@ def test_list_employees_returns_paginated_payload(employee_service: Mock) -> Non
     assert len(body["items"]) == 1
 
 
-def test_update_employee_empty_body_returns_400(employee_service: Mock) -> None:
+def test_update_employee_empty_body_returns_400(employee_service: Mock, function_context) -> None:
     employee_service.update_employee.side_effect = ValidationError(
         "At least one field must be provided."
     )
@@ -154,12 +154,12 @@ def test_update_employee_empty_body_returns_400(employee_service: Mock) -> None:
         headers={"Content-Type": "application/json"},
     )
 
-    resp = update_employee(req)
+    resp = update_employee(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 400
 
 
-def test_delete_employee_returns_204(employee_service: Mock) -> None:
+def test_delete_employee_returns_204(employee_service: Mock, function_context) -> None:
     req = func.HttpRequest(
         method="DELETE",
         url="/api/employees/1",
@@ -167,7 +167,7 @@ def test_delete_employee_returns_204(employee_service: Mock) -> None:
         route_params={"employeeId": "1"},
     )
 
-    resp = delete_employee(req)
+    resp = delete_employee(req, function_context)  # type: ignore[arg-type]
 
     assert resp.status_code == 204
     employee_service.delete_employee.assert_called_once_with(1)

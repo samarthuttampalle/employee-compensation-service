@@ -6,6 +6,8 @@ import json
 import os
 from pathlib import Path
 
+import pytest
+
 
 def _load_local_settings() -> None:
     settings_path = Path(__file__).resolve().parents[1] / "local.settings.json"
@@ -25,3 +27,14 @@ def _load_local_settings() -> None:
 
 
 _load_local_settings()
+
+
+class FakeFunctionContext:
+    """Minimal Azure Functions context for in-process API tests."""
+
+    invocation_id = "test-invocation-id"
+
+
+@pytest.fixture
+def function_context() -> FakeFunctionContext:
+    return FakeFunctionContext()

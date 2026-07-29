@@ -41,7 +41,7 @@ def _service() -> DepartmentService:
 @handle_errors
 def create_department(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """POST /api/departments — create a new department."""
     request = parse_json_body(req, CreateDepartmentRequest)
@@ -58,7 +58,7 @@ def create_department(
 @handle_errors
 def get_department(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/departments/{departmentId} — retrieve one department."""
     department_id = parse_positive_int(req.route_params.get("departmentId"), "departmentId")
@@ -70,7 +70,7 @@ def get_department(
 @handle_errors
 def list_departments(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/departments — list all departments."""
     result = _service().list_departments()
@@ -85,7 +85,7 @@ def list_departments(
 @handle_errors
 def update_department(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """PATCH /api/departments/{departmentId} — partial department update."""
     department_id = parse_positive_int(req.route_params.get("departmentId"), "departmentId")
@@ -98,7 +98,7 @@ def update_department(
 @handle_errors
 def delete_department(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """DELETE /api/departments/{departmentId} — delete a department."""
     department_id = parse_positive_int(req.route_params.get("departmentId"), "departmentId")

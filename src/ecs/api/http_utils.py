@@ -125,9 +125,7 @@ def parse_bool_query(value: str | None) -> bool:
     return value is not None and value.strip().lower() == "true"
 
 
-def _get_correlation_id(context: func.Context | None) -> str | None:
-    if context is None:
-        return None
+def _get_correlation_id(context: func.Context) -> str:
     return context.invocation_id
 
 
@@ -148,7 +146,7 @@ def handle_errors(handler: F) -> F:
     @wraps(handler)
     def wrapper(
         req: func.HttpRequest,
-        context: func.Context | None = None,
+        context: func.Context,
     ) -> func.HttpResponse:
         correlation_id = _get_correlation_id(context)
         log_context = _request_log_context(req, correlation_id)

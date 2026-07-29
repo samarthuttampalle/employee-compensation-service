@@ -42,7 +42,7 @@ def _service() -> EmployeeService:
 @handle_errors
 def create_employee(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """POST /api/employees — create a new employee."""
     request = parse_json_body(req, CreateEmployeeRequest)
@@ -59,7 +59,7 @@ def create_employee(
 @handle_errors
 def get_employee(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/employees/{employeeId} — retrieve one employee."""
     employee_id = parse_positive_int(req.route_params.get("employeeId"), "employeeId")
@@ -77,7 +77,7 @@ def get_employee(
 @handle_errors
 def list_employees(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/employees — list employees with optional filters."""
     department_id = parse_optional_positive_int(req.params.get("departmentId"), "departmentId")
@@ -97,7 +97,7 @@ def list_employees(
 @handle_errors
 def update_employee(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """PATCH /api/employees/{employeeId} — partial employee update."""
     employee_id = parse_positive_int(req.route_params.get("employeeId"), "employeeId")
@@ -110,7 +110,7 @@ def update_employee(
 @handle_errors
 def delete_employee(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """DELETE /api/employees/{employeeId} — delete an employee."""
     employee_id = parse_positive_int(req.route_params.get("employeeId"), "employeeId")

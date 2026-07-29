@@ -91,7 +91,7 @@ def _bonus_ranking_item(row: BonusRankingRow) -> BonusRankingItem:
 @handle_errors
 def get_total_bonus(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/reports/total-bonus — B1."""
     total = _service().get_total_bonus_paid()
@@ -102,7 +102,7 @@ def get_total_bonus(
 @handle_errors
 def get_employees_without_bonus(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/reports/employees-without-bonus — B2."""
     result = _service().get_employees_without_bonus()
@@ -117,7 +117,7 @@ def get_employees_without_bonus(
 @handle_errors
 def get_bonus_percentage(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/reports/bonus-percentage — B3."""
     items = _service().get_bonus_percentages()
@@ -129,7 +129,7 @@ def get_bonus_percentage(
 @handle_errors
 def get_departments_over_average(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/reports/departments-over-average — B4."""
     items = _service().get_departments_over_average()
@@ -143,7 +143,7 @@ def get_departments_over_average(
 @handle_errors
 def get_bonus_ranking(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/reports/bonus-ranking — B5."""
     items = _service().get_bonus_ranking()
@@ -155,7 +155,7 @@ def get_bonus_ranking(
 @handle_errors
 def get_highest_compensation(
     req: func.HttpRequest,
-    context: func.Context | None = None,
+    context: func.Context,
 ) -> func.HttpResponse:
     """GET /api/reports/highest-compensation — B6."""
     result = _service().get_highest_compensation()
