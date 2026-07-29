@@ -1,0 +1,7 @@
+# Runtime dependencies — compile with: pip-compile requirements.in -o requirements.txt
+azure-functions>=1.21.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+sqlalchemy>=2.0.25
+pyodbc>=5.0.0
+azure-monitor-opentelemetry>=1.2.0

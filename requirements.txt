@@ -1,0 +1,7 @@
+# Pinned runtime dependencies (compile from requirements.in with pip-tools when available)
+azure-functions==1.21.3
+pydantic==2.10.6
+pydantic-settings==2.7.1
+sqlalchemy==2.0.37
+pyodbc==5.2.0
+azure-monitor-opentelemetry==1.6.4

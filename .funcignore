@@ -1,0 +1,17 @@
+.git*
+.vscode
+.venv
+venv
+tests
+docs
+sql
+infra
+.github
+*.md
+local.settings.json
+pyproject.toml
+requirements-dev.txt
+requirements.in
+.mypy_cache
+.ruff_cache
+.pytest_cache

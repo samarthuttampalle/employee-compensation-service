@@ -1,0 +1,605 @@
+openapi: 3.0.3
+info:
+  title: Employee Compensation Service
+  version: 1.0.0
+  description: |
+    Azure Functions HTTP API for employee/department CRUD and compensation reporting.
+    Local base URL: `http://localhost:7071/api`
+  contact:
+    name: Employee Compensation Service
+servers:
+  - url: http://localhost:7071/api
+    description: Local Azure Functions host
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: employee-compensation-service
+
+  /employees:
+    get:
+      summary: List employees
+      operationId: listEmployees
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: top
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 50
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Paginated employee list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeListResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+    post:
+      summary: Create employee
+      operationId: createEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmployeeRequest"
+      responses:
+        "201":
+          description: Employee created
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+
+  /employees/{employeeId}:
+    parameters:
+      - $ref: "#/components/parameters/EmployeeId"
+    get:
+      summary: Get employee by ID
+      operationId: getEmployee
+      parameters:
+        - name: applyDefaultBonus
+          in: query
+          description: When true and stored bonus is null, compute effectiveBonus = salary * rate
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Employee found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    patch:
+      summary: Partial update employee
+      operationId: updateEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmployeeRequest"
+      responses:
+        "200":
+          description: Employee updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    delete:
+      summary: Delete employee
+      operationId: deleteEmployee
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          $ref: "#/components/responses/Error"
+
+  /departments:
+    get:
+      summary: List departments
+      operationId: listDepartments
+      responses:
+        "200":
+          description: Department list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentListResponse"
+    post:
+      summary: Create department
+      operationId: createDepartment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDepartmentRequest"
+      responses:
+        "201":
+          description: Department created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+
+  /departments/{departmentId}:
+    parameters:
+      - $ref: "#/components/parameters/DepartmentId"
+    get:
+      summary: Get department by ID
+      operationId: getDepartment
+      responses:
+        "200":
+          description: Department found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentResponse"
+        "404":
+          $ref: "#/components/responses/Error"
+    patch:
+      summary: Partial update department
+      operationId: updateDepartment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDepartmentRequest"
+      responses:
+        "200":
+          description: Department updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+    delete:
+      summary: Delete department
+      operationId: deleteDepartment
+      parameters:
+        - name: force
+          in: query
+          description: When true, unassign employees then delete
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "204":
+          description: Deleted with no reassignments
+        "200":
+          description: Deleted after forcing unassign
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForceDeleteDepartmentResponse"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+
+  /reports/total-bonus:
+    get:
+      summary: B1 — Total bonus paid (NULL as 0)
+      operationId: getTotalBonus
+      responses:
+        "200":
+          description: Company-wide total bonus
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotalBonusResponse"
+
+  /reports/employees-without-bonus:
+    get:
+      summary: B2 — Employees with Bonus IS NULL
+      operationId: getEmployeesWithoutBonus
+      responses:
+        "200":
+          description: Employees who never received a bonus
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeesWithoutBonusResponse"
+
+  /reports/bonus-percentage:
+    get:
+      summary: B3 — Bonus as percentage of salary
+      operationId: getBonusPercentage
+      responses:
+        "200":
+          description: Rows for employees who have a bonus
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BonusPercentageResponse"
+
+  /reports/departments-over-average:
+    get:
+      summary: B4 — Departments where SUM(bonus) > AVG(salary)
+      operationId: getDepartmentsOverAverage
+      responses:
+        "200":
+          description: Matching departments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepartmentsOverAverageResponse"
+
+  /reports/bonus-ranking:
+    get:
+      summary: B5 — Employees ranked by bonus (NULL last)
+      operationId: getBonusRanking
+      responses:
+        "200":
+          description: Ranked employees
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BonusRankingResponse"
+
+  /reports/highest-compensation:
+    get:
+      summary: B6 — Highest salary vs highest total compensation
+      operationId: getHighestCompensation
+      responses:
+        "200":
+          description: Comparison result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HighestCompensationResponse"
+        "404":
+          $ref: "#/components/responses/Error"
+
+components:
+  parameters:
+    EmployeeId:
+      name: employeeId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    DepartmentId:
+      name: departmentId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+
+  responses:
+    Error:
+      description: Standard error envelope
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+
+  schemas:
+    Money:
+      type: string
+      description: Decimal serialized as string (12,2)
+      example: "95000.00"
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              nullable: true
+            correlationId:
+              type: string
+              nullable: true
+
+    CreateEmployeeRequest:
+      type: object
+      required: [firstName, lastName, salary]
+      properties:
+        firstName:
+          type: string
+          maxLength: 50
+        lastName:
+          type: string
+          maxLength: 50
+        departmentId:
+          type: integer
+          nullable: true
+        salary:
+          $ref: "#/components/schemas/Money"
+        bonus:
+          allOf:
+            - $ref: "#/components/schemas/Money"
+          nullable: true
+        hireDate:
+          type: string
+          format: date
+          nullable: true
+
+    UpdateEmployeeRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          maxLength: 50
+        lastName:
+          type: string
+          maxLength: 50
+        departmentId:
+          type: integer
+          nullable: true
+        salary:
+          $ref: "#/components/schemas/Money"
+        bonus:
+          allOf:
+            - $ref: "#/components/schemas/Money"
+          nullable: true
+        hireDate:
+          type: string
+          format: date
+          nullable: true
+
+    EmployeeResponse:
+      type: object
+      properties:
+        employeeId:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        departmentId:
+          type: integer
+          nullable: true
+        salary:
+          $ref: "#/components/schemas/Money"
+        bonus:
+          allOf:
+            - $ref: "#/components/schemas/Money"
+          nullable: true
+        hireDate:
+          type: string
+          format: date
+          nullable: true
+        effectiveBonus:
+          allOf:
+            - $ref: "#/components/schemas/Money"
+          nullable: true
+        bonusIsDefaulted:
+          type: boolean
+          nullable: true
+
+    EmployeeListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmployeeResponse"
+        total:
+          type: integer
+        top:
+          type: integer
+        skip:
+          type: integer
+
+    CreateDepartmentRequest:
+      type: object
+      required: [departmentName]
+      properties:
+        departmentName:
+          type: string
+          maxLength: 100
+        location:
+          type: string
+          maxLength: 100
+          nullable: true
+
+    UpdateDepartmentRequest:
+      type: object
+      properties:
+        departmentName:
+          type: string
+          maxLength: 100
+        location:
+          type: string
+          maxLength: 100
+          nullable: true
+
+    DepartmentResponse:
+      type: object
+      properties:
+        departmentId:
+          type: integer
+        departmentName:
+          type: string
+        location:
+          type: string
+          nullable: true
+
+    DepartmentListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepartmentResponse"
+        total:
+          type: integer
+
+    ForceDeleteDepartmentResponse:
+      type: object
+      properties:
+        departmentId:
+          type: integer
+        unassignedEmployees:
+          type: integer
+
+    TotalBonusResponse:
+      type: object
+      properties:
+        totalBonusPaid:
+          $ref: "#/components/schemas/Money"
+
+    EmployeesWithoutBonusResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              employeeId:
+                type: integer
+              firstName:
+                type: string
+              lastName:
+                type: string
+        count:
+          type: integer
+
+    BonusPercentageResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              employeeId:
+                type: integer
+              firstName:
+                type: string
+              lastName:
+                type: string
+              bonusPercentage:
+                $ref: "#/components/schemas/Money"
+
+    DepartmentsOverAverageResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              departmentId:
+                type: integer
+              departmentName:
+                type: string
+              totalBonusPaid:
+                $ref: "#/components/schemas/Money"
+              averageSalary:
+                $ref: "#/components/schemas/Money"
+
+    BonusRankingResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              rank:
+                type: integer
+              employeeId:
+                type: integer
+              firstName:
+                type: string
+              lastName:
+                type: string
+              bonus:
+                allOf:
+                  - $ref: "#/components/schemas/Money"
+                nullable: true
+
+    HighestCompensationResponse:
+      type: object
+      properties:
+        highestSalaryEmployee:
+          type: object
+          properties:
+            employeeId:
+              type: integer
+            firstName:
+              type: string
+            lastName:
+              type: string
+            salary:
+              $ref: "#/components/schemas/Money"
+        isAlsoHighestTotalCompensation:
+          type: boolean
+        highestTotalCompensationEmployee:
+          type: object
+          properties:
+            employeeId:
+              type: integer
+            firstName:
+              type: string
+            lastName:
+              type: string
+            totalCompensation:
+              $ref: "#/components/schemas/Money"
