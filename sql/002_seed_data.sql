@@ -1,8 +1,3 @@
-/*
-Phase 1 - Seed data script
-Includes edge-case records needed by reporting requirements.
-*/
-
 SET IDENTITY_INSERT dbo.Department ON;
 INSERT INTO dbo.Department (DepartmentID, DepartmentName, Location)
 VALUES
