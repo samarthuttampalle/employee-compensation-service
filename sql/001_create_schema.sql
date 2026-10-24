@@ -1,8 +1,3 @@
-/*
-Phase 1 - Schema creation script
-Target: SQL Server / Azure SQL Database
-*/
-
 IF OBJECT_ID('dbo.Employee', 'U') IS NOT NULL
 BEGIN
     DROP TABLE dbo.Employee;
