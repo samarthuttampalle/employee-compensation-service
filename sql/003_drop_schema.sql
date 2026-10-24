@@ -1,7 +1,3 @@
-/*
-Phase 1 - Schema teardown script
-*/
-
 IF OBJECT_ID('dbo.Employee', 'U') IS NOT NULL
 BEGIN
     DROP TABLE dbo.Employee;
