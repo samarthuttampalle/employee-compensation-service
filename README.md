@@ -213,7 +213,3 @@ scripts/          # secrets audit + assignment verification
 infra/            # Bicep (Function App, SQL, Key Vault, App Insights)
 docs/             # TDD, ADRs, OpenAPI, architecture
 ```
-
-## Implementation status
-
-Tracked in [docs/Implementation_Checklist.md](docs/Implementation_Checklist.md).
